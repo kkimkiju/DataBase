@@ -337,5 +337,3 @@ SELECT TO_NUMBER('1300') - '1000' FROM dual;
 --TO_DATE : 문자열로 명시된 날짜로 변환하는함수
 SELECT TO_DATE('22/08/20', 'YY/MM/DD')
 FROM dual;
-
-따딴
