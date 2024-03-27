@@ -518,4 +518,70 @@ ORDER BY DEPTNO;
 -- 순서 1.FROM 2.WHERE 3.GROUP BY 4.HAVING 5.SELECT 6.ORDER BY
 
 -- HAVING 절 : GROUP BY 절이 존재할 때만 사용, GROUP BY절을 통해 그룹화된 결과 값의 범위를 제한하는데 사용
+ SELECT job, AVG(SAL)
+ FROM EMP
+ WHERE DEPTNO = 10
+ GROUP BY JOB
+ 	HAVING AVG(sal) >= 2000
+ ORDER BY JOB; 
  
+-- 1. HAVING절을 사용하여 부서별 직책의 평균 급여가 500 이상인 사원들의 부서번호,직책,평균급여 출력
+SELECT deptno,job,AVG(SAl)
+FROM EMP
+GROUP BY DEPTNO,job
+	HAVING AVG(sal) >= 500
+ORDER BY DEPTNO ,JOB;
+
+
+-- 2.부서번호, 평균급여, 최고급여,최저급여, 사원수 출력 / 단 평균 급여는 소수점 제외하고 부서 번호별 출력
+SELECT deptno,ROUND(AVG(SAL)),MAX(SAL),MIn(SAL),COUNT(*)
+FROM EMP
+GROUP BY DEPTNO;
+
+-- 3. 같은 직책의 종사하는 사원이 3명 이상인 직책과 인원을 출력
+SELECT job,COUNT(*)
+FROM EMP
+GROUP BY JOB
+	HAVING COUNT(*) >= 3
+
+-- 4. 사원들의 입사 연도를 기준으로 부서별로 몇 명이 입사했는지 출력
+SELECT EXTRACT(YEAR FROM HIREDATE) AS "입사 년도", deptno,count(*)
+FROM EMP
+GROUP BY DEPTNO,EXTRACT(year FROM HIREDATE)
+ORDER BY EXTRACT(YEAR FROM HIREDATE),deptno
+
+SELECT TO_CHAR(hiredate, 'YYYY') AS "입사 년도", deptno,count(*)
+FROM EMP
+GROUP BY TO_CHAR(hiredate, 'YYYY'),deptno
+ORDER BY "입사 년도"
+
+
+-- 5. 추가 수당을 받는 사원과 받지 않는 사원 수 출력, 추가 수당 여부는 O,X로 표기
+SELECT 
+    CASE WHEN (COMM IS NULL OR COMM = 0) THEN 'X' ELSE 'O' END AS "추가 수당 여부",
+    COUNT(*) AS "인원 수"
+FROM EMP
+GROUP BY 
+    CASE WHEN (COMM IS NULL OR COMM = 0) THEN 'X' ELSE 'O' END;
+
+   
+-- 6. 각 부서의 입사 연도별 사원 수 , 최고 급여, 급여 합, 평균 급여를 출력
+
+SELECT EXTRACT(YEAR FROM HIREDATE), deptno,count(*),MAX(SAL),Sum(sal),AVG(SAL)
+FROM EMP
+GROUP BY DEPTNO,EXTRACT(year FROM HIREDATE)
+ORDER BY DEPTNO
+
+SELECT deptno,
+	TO_CHAR(hiredate, 'YYYY') AS "입사년도",
+	COUNT(*) AS "사원 수",
+	MAX(sal) AS "최고 급여",
+	ROUND(AVG(SAL)) AS "평균 급여"
+FROM EMP
+GROUP BY deptno, TO_CHAR(hiredate, 'YYYY')
+ORDER BY DEPTNO
+
+-- ROLLUP 함수 : 그룹마다 중간통계 마지막에는 전체통계
+SELECT deptno, job, COUNT(*), MAX(sal), SUM(sal), AVG(sal)
+FROM EMP
+GROUP BY ROLLUP(DEPTNO ,JOB);
