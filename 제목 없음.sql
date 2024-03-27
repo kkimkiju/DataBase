@@ -447,6 +447,75 @@ SELECT *
 FROM EMP
 WHERE MONTHS_BETWEEN(SYSDATE, HIREDATE)/12 >= 38;
 
+
+
 -- 19. 오늘 날짜에서 년도만 추출
 SELECT EXTRACT(YEAR FROM SYSDATE)
 FROM DUAL;
+
+-- 다중행 함수 : 여러 행에 대해 함수가 적용되어 하나의 결과를 나타내는 함수, 집계 함수라고도 함
+SELECT SUM(sal)
+FROM EMP;
+
+--GROUP BY : 그룹으로 묶어주는 함수
+SELECT deptno, SUM(SAL)  --3.부서와 부서의 급여의 합계를 출력
+FROM EMP                 --1.먼저 사원 테이블을 가져 옴
+GROUP BY DEPTNO;         --2.사원 테이블을 부서 단위로 묶음
+
+-- 모든 사원의 급여와 수당의 합계 구하기
+SELECT sum(sal),sum(comm)
+FROM EMP;
+
+-- 테이블의 데이터 개수 출력
+SELECT COUNT(*)
+FROM EMP;
+
+-- 30번 부서의 사원 수 출력
+SELECT COUNT(*)
+FROM EMP
+WHERE DEPTNO = 30;
+
+SELECT COUNT(comm)
+FROM EMP
+WHERE comm IS NOT NULL;
+
+--10번 부서의 사원 중 최대 급여 출력하기
+SELECT MAX(SAL)
+FROM EMP
+WHERE DEPTNO = 10;
+
+--30번 부서의 평균 급여
+SELECT AVG(SAL)
+FROM EMP
+WHERE DEPTNO = 30;
+
+--부서별 평균 급여
+SELECT AVG(SAL), deptno
+FROM EMP
+GROUP BY DEPTNO;
+
+SELECT AVG(SAL) FROM EMP WHERE deptno = 10
+UNION ALL
+SELECT AVG(SAL) FROM EMP WHERE DEPTNO = 20
+UNION ALL 
+SELECT AVG(SAL) FROM EMP WHERE DEPTNO = 30;
+
+--부서번호 및 직책별 평균 급여로 정렬하기
+SELECT deptno,job,AVG(sal)
+FROM EMP
+GROUP BY DEPTNO, JOB 
+ORDER BY DEPTNO, JOB
+
+--부서 코드, 급여 합계, 부서 평균 급여, 인원 순 정렬로 출력하기
+SELECT deptno AS "부서 코드",
+	SUM(SAL) AS "급여 합계",
+	ROUND(AVG(SAL)) AS "평균 급여",
+	COUNT(*) AS "인원 수"
+FROM EMP
+GROUP BY DEPTNO
+ORDER BY DEPTNO;
+
+-- 순서 1.FROM 2.WHERE 3.GROUP BY 4.HAVING 5.SELECT 6.ORDER BY
+
+-- HAVING 절 : GROUP BY 절이 존재할 때만 사용, GROUP BY절을 통해 그룹화된 결과 값의 범위를 제한하는데 사용
+ 
