@@ -585,3 +585,40 @@ ORDER BY DEPTNO
 SELECT deptno, job, COUNT(*), MAX(sal), SUM(sal), AVG(sal)
 FROM EMP
 GROUP BY ROLLUP(DEPTNO ,JOB);
+
+-- 집합 연산자 : 두 개 이상의 쿼리 결과를 하나로 결합하는 연산자(수직적 처리)
+SELECT empno, ename, job
+FROM EMP
+WHERE job = 'SALESMAN'
+UNION
+SELECT empno, ename, job
+FROM EMP
+WHERE job = 'MANAGER'
+ORDER BY JOB
+
+-- 조인(JOIN) : 두 개 이상의 테이블에서 데이터를 가져와서 연결하는데 사용되는 SQL 기능
+-- 테이블에 대한 식별 값인 Promary Key와 테이블 간에 공통값인 Foreign Key값을 사용하여 조인
+-- 내부 조인(동등 조인, inner join)이며 오라클 방식, 양쪽에 동일한 컬럼이 있는 경우 테이블 이름을 표시해야 함
+SELECT empno, ename, mgr,sal, e.DEPTNO
+FROM emp e, dept d
+WHERE e.DEPTNO = d.DEPTNO
+AND sal >= 3000;	
+
+-- ANSI 방식
+SELECT empno,ename,mgr,sal,e.DEPTNO
+FROM EMP e JOIN DEPT d
+ON e.DEPTNO = d.DEPTNO
+WHERE sal >= 3000;
+
+SELECT E.EMPNO, E.ENAME, D.DEPTNO, D.DNAME,D.LOC  
+FROM EMP E JOIN DEPT D
+ON E.DEPTNO = D.DEPTNO
+WHERE sal <= 2500 AND EMPNO <=9999
+ORDER BY DEPTNO 
+
+--비등가 조인 : 동일한 컬럼이 없을 때 사용하는 조인(일반적으로 많이 사용되지는 않음)
+SELECT * FROM emp;
+SELECT * FROM SALGRADE;
+SELECT e.ENAME, e.SAL,s.GRADE
+FROM EMP e JOIN SALGRADE s 
+ON e.SAL BETWEEN s.LOSAL AND s.HISAL
