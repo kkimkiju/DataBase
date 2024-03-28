@@ -808,5 +808,136 @@ WHERE(DEPTNO ,SAL) IN(SELECT DEPTNO, MAX(SAL)
 						FROM EMP
 						GROUP BY deptno);
 					
+-- FROM 절에서 사용하는 서브쿼리 : 인라인뷰라고 부름
+-- 테이블 내의 데이터 규모가 너무 크거나 특정 열만 제공해야 하는 경우 사용
+SELECT e10.empno, e10.ename, e10.deptno, d.dname, d.loc
+FROM (SELECT empno,ename,deptno FROM emp WHERE DEPTNO = 10 ) e10 JOIN DEPT d
+ON e10.DEPTNO =d.DEPTNO;
+
+-- SELECT절에 사용하는 서브쿼리 : 스칼라 서브쿼리라고 부름
+-- SELECT절에 사용되는 서브쿼리는 반드시 하나의 결과만 반환되어야 함
+SELECT empno, ename, job, sal, (SELECT grade FROM SALGRADE 
+                                 WHERE e.sal BETWEEN losal AND hisal) AS SALGRADE, deptno,
+                               (SELECT dname FROM dept d
+                                 WHERE e.deptno = d.deptno) AS DNAME
+FROM EMP e;
 
 
+SELECT ename, deptno, sal, (SELECT TRUNC(AVG(SAL)) FROM EMP
+							WHERE deptno = e.deptno) AS "부서별 급여 평균"
+FROM EMP e;
+
+SELECT empno, ename, 
+			CASE WHEN deptno = (SELECT deptno FROM DEPT WHERE loc = 'NEW YORK')
+				THEN '본사' --참
+				ELSE '분점' --부정
+			END AS "소속" --case문 행 이름
+FROM EMP
+ORDER BY 소속 DESC;
+
+-- DECODE : 주어진 데이터 값이 조건 값과 일치하는 값을 출력하고 일치하지 않으면 기본값 출력
+SELECT EMPNO, ENAME, JOB, SAL,
+     DECODE(JOB,
+     'MANAGER' , SAL*1.1,
+     'SALESMAN', SAL*1.05,
+     'ANALYST' , SAL,
+     SAL*1.03) AS "급여 인상 후"
+ FROM EMP;
+ --CASE 문 :
+SELECT empno, ename, job, sal,
+	CASE job
+		WHEN 'MANAGER' THEN sal *1.1
+		WHEN 'SALESMAN' THEN SAL*1.05
+		WHEN 'ANALYST' THEN SAL
+		ELSE SAL*1.03
+		END AS "급여 인상 후"
+FROM EMp;	
+
+--1번--
+SELECT job,empno,ename,sal,e.deptno,dname
+FROM EMP e JOIN DEPT d
+ON e.DEPTNO = d.DEPTNO
+WHERE job = (SELECT JOB FROM EMP WHERE ENAME = 'ALLEN' )
+ORDER BY EMPNO DESC
+
+--2번--
+SELECT e.empno, e.ename, d.dname, e.hiredate, d.loc, e.sal ,s.grade
+FROM EMP e, DEPT d ,SALGRADE s
+WHERE e.DEPTNO  = d.DEPTNO 
+AND e.sal BETWEEN s.LOSAL AND s.HISAL
+AND sal > (SELECT avg(SAL) FROM EMP)
+ORDER BY sal DESC,e.EMPNO 
+
+--3번--
+SELECT empno,ename,job,d.deptno,dname,loc
+FROM EMP e , DEPT d
+WHERE e.DEPTNO = d.DEPTNO 
+AND d.DEPTNO =10
+AND job NOT IN (SELECT job FROM EMP WHERE DEPTNO = 30)
+
+--4번--
+SELECT empno,ename,sal,grade
+FROM emp, SALGRADE
+WHERE sal BETWEEN LOSAL AND HISAL
+AND SAl > (SELECT MAX(SAL) FROM emp WHERE job = 'SALESMAN') 
+ORDER BY empno
+
+--4번 all넣어서 쓰는 방법--
+SELECT E.EMPNO, E.ENAME, E.SAL, S.GRADE
+  FROM EMP E, SALGRADE S
+ WHERE E.SAL BETWEEN S.LOSAL AND S.HISAL
+   AND SAL > ALL (SELECT SAL
+                    FROM EMP
+                   WHERE JOB = 'SALESMAN')
+ORDER BY E.EMPNO;
+
+-- DML (DATA Manipulation Language) : 조회(SELECT), 삭제(DELETE), 입력(INSERT), 변경(UPDATE)
+CREATE TABLE DEPT_TEMP
+AS SELECT * FROM DEPT;
+
+SELECT * FROM DEPT_TEMP;
+
+INSERT INTO dept_temp(deptno, dname, loc) VALUES(50, 'DATABASE', 'SEOUL');
+
+INSERT INTO dept_temp VALUES(60, 'NETWORK','BUSAN');
+
+INSERT INTO dept_temp(deptno, loc) VALUES(70, 'SUWON');
+
+INSERT INTO dept_temp VALUES(80, 'Mobile', '');
+
+CREATE TABLE emp_temp
+AS SELECT * FROM EMP
+WHERE 1 != 1;
+
+SELECT * FROM emp_temp;
+
+INSERT INTO emp_temp VALUES(9001, '나영석', 'PRESIDENT',NULL, '2010/01/01',9900,1000,10);
+
+INSERT INTO emp_temp VALUES (9002, '이은지', 'MANAGER', 9999, '2020-04-05', 5500, 800, 20);
+        
+INSERT INTO EMP_TEMP(EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+        VALUES (9002, '미미', 'MANAGER', 9999, TO_DATE('2021/07/01', 'YYYY/MM/DD'), 5500, 800, 20);
+       
+INSERT INTO EMP_TEMP(EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+        VALUES (9002, '안유진', 'MANAGER', 9999, SYSDATE, 5000, 800, 20);
+       
+       
+INSERT INTO EMP_TEMP(EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+SELECT E.EMPNO, E.ENAME, E.JOB, E.MGR, E.HIREDATE, E.SAL, E.COMM, E.DEPTNO
+FROM EMP E, SALGRADE S
+WHERE E.SAL BETWEEN S.LOSAL AND S.HISAL
+AND S.GRADE = 1;
+
+
+--테이블에 있는 데이터 수정하기(Update)
+CREATE TABLE dept_temp2
+AS SELECT * FROM dept;
+
+SELECT * FROM dept_temp2;
+
+UPDATE dept_temp2
+	SET loc = 'SEOUL';
+
+commit
+	
+ROLLBACK;
