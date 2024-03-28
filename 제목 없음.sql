@@ -730,3 +730,83 @@ AND job = 'MANAGER'
 SELECT ENAME, SAL,NVL(COMM,0),SAL+NVL(COMM,0)  AS "총액" 
 FROM EMP
 ORDER BY "총액" DESC
+
+SELECT ENAME, SAL, SAL*1.13 AS "보너스", EMPNO 
+FROM EMP e 
+WHERE DEPTNO = 10
+
+SELECT ENAME, HIREDATE, NEXT_DAY(HIREDATE+60, '월요일')"디데이"
+FROM EMP;
+
+SELECT LOWER(SUBSTR(ENAME, 1,3))
+FROM EMP
+WHERE LENGTH(ENAME)>=6
+
+-- 서브쿼리 : 쿼리문 내에 포함되는 쿼리문을 의미, 일반적으로 SELECT문의 WHERE 절에서 사용
+-- 단일행 서브쿼리와 다중행 서브쿼리가 있음
+SELECT dname FROM DEPT
+WHERE DEPTNO = (SELECT deptno 
+					FROM emp 
+					WHERE ename = 'KING');
+					
+SELECT * FROM EMP
+WHERE SAL > (SELECT SAL	
+				FROM EMP 
+				 WHERE ename = 'JONES')
+
+SELECT * FROM EMP
+WHERE COMM > (SELECT COMM
+				FROM EMP
+				WHERE ENAME = 'ALLEN')
+				
+SELECT * FROM EMP
+WHERE HIREDATE <(SELECT HIREDATE FROM EMP 
+					WHERE ENAME = 'JAMES')
+					
+SELECT e.EMPNO, e.ENAME, e.JOB, e.SAL, d.DEPTNO, d.DNAME, d.loc
+FROM EMP e JOIN DEPT d
+ON e.DEPTNO = d.DEPTNO
+WHERE e.deptno = 20
+AND e.SAL > (SELECT AVG(SAL) FROM EMP)
+
+-- 실행 결과가 여러개인 다중행 서브쿼리
+-- IN : 메인쿼리의 데이터가 서브쿼리의 결과 중 하나라도 일치한 데이터가 있으면 true
+-- ANY, SOME : 메인 쿼리의 조건식을 만족하는 서브쿼리의 결과가 하나 이상이면 true
+-- ALL : 메인 쿼리의 조건식을 서브 쿼리의 결과 모두가 만족하면 true
+-- EXISTS : 서브 쿼리의 결과가 존재하면 true
+
+SELECT * FROM EMP
+WHERE sal IN(SELECT MAX(sal) FROM EMP GROUP BY DEPTNO)
+
+SELECT empno, ename, sal
+FROM EMP
+WHERE sal > ANY(SELECT sal FROM emp WHERE job = 'SALESMAN') --salesman 직종의 최저급여보다 크면 다 만족
+
+SELECT empno, ename, sal
+FROM EMP
+WHERE sal = ANY(SELECT sal FROM emp WHERE job = 'SALESMAN')
+
+--ALL : 다중행으로 반환되는 서브쿼리의 결과를 모두 만족해야 참
+SELECT * FROM EMP
+WHERE SAL < ALL(SELECT sal FROM EMP WHERE deptno = 30) -- 최저 급여보다 작아야 함
+
+SELECT empno, ename, sal
+FROM EMP
+WHERE sal > ALL(SELECT SAL FROM EMP WHERE job = 'MANAGER')
+
+SELECT * FROM EMP
+WHERE EXISTS(SELECT DNAME FROM DEPT WHERE DEPTNO = 40);
+
+--다중열 서브쿼리 : 서브쿼리의 결과가 두 개 이상의 컬럼으로 반환되어 메인 쿼리에 전달
+SELECT empno, ename, sal, deptno
+FROM EMP
+WHERE (DEPTNO, SAL) IN (SELECT DEPTNO, SAL FROM EMP e
+						WHERE DEPTNO = 30);
+					
+SELECT * FROM EMP
+WHERE(DEPTNO ,SAL) IN(SELECT DEPTNO, MAX(SAL)
+						FROM EMP
+						GROUP BY deptno);
+					
+
+
