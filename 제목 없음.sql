@@ -936,8 +936,197 @@ AS SELECT * FROM dept;
 SELECT * FROM dept_temp2;
 
 UPDATE dept_temp2
-	SET loc = 'SEOUL';
+	SET loc = 'SUWON';
 
-commit
+UPDATE DEPT_TEMP2
+	SET loc = '대전'
+WHERE deptno = 40;
+
+DELETE FROM DEPT_TEMP2
+
+CREATE TABLE LECTURETB(
+    title VARCHAR(50),
+    teacher VARCHAR(15),
+    room VARCHAR(20),
+    CURRENT INT,
+    max INT)
+;
+   
+   
+--DDL(Data Definition Language) 
+--: 데이터베이스 데이터를 보관하고 관리하기 위해 제공되는 여러 객체의 생성(create),변경(alter),삭제(drop), 관련 기능 수행
+--DDL은 commit, rollback이 없음
+CREATE TABLE EMP_DDL(
+	EMPNO NUMBER(4),
+	ENAME VARCHAR2(10), -- VARCHAR2는 10자리 이하의 가변 크기를 할당
+	JOB VARCHAR2(9),
+	MGR NUMBER(4),
+	HIREDATE DATE,
+	SAL NUMBER(7,2), -- 총 7자의 숫자 중 소수점 이하가 2자리, 정수부 5자리
+	COMM NUMBER(7,2),
+	DEPTNO NUMBER(2)
+	);
+
+SELECT * FROM EMP_DDL;
+DESC EMP_DDL;
+
+--기존 테이블을 복사해서 새 테이블 만들기
+CREATE TABLE DEPT_DDL
+	AS SELECT * FROM DEPT;
+
+SELECT * FROM DEPT_DDL
+
+CREATE TABLE EMP_DDL_30
+AS SELECT * FROM EMP
+WHERE DEPTNO = 30;
+
+SELECT * FROM EMP_DDL_30;
+
+-- 테이블을 변경하는 ALTER : 테이블에새 열을 추가, 삭제하거나 열의 자료형 또는 길이 변경
+CREATE TABLE EMP_ALTER
+	AS SELECT * FROM EMP
 	
-ROLLBACK;
+SELECT * FROM EMP_ALTER;
+
+--ALTER에 ADD : 컬럼을 추가
+ALTER TABLE EMP_ALTER
+	ADD HP VARCHAR(20);
+
+SELECT * FROM EMP_ALTER;
+
+--ALTER RENAME : 열 이름을 변경
+ALTER TABLE EMP_ALTER
+	RENAME COLUMN HP TO TEL;
+
+--ALTER에 MODIFY : 열의 자료형을 변경 / 단 포함된 내용 크기 이하로 작게하는 건 X 크게하는 건 O
+ALTER TABLE EMP_ALTER
+	MODIFY EMPNO NUMBER(5);
+
+ALTER TABLE EMP_ALTER
+	MODIFY TEL VARCHAR(18); -- 크기를 줄였찌만 영향 받는 해당 컬럼에 대한 데이터가 영향 받지 않으므로 가능
+
+--ALTER DROP : 특정 열을 삭제 할 때	
+ALTER TABLE EMP_ALTER 
+	DROP COLUMN comm;
+
+--테이블 이름 변경 : RENAME
+RENAME EMP_ALTER TO EMP_RENAME
+
+SELECT * FROM EMP_RENAME;
+
+--테이블 데이터를 삭제하는 TRUNCATE
+TRUNCATE TABLE EMP_RENAME; --ROLLBACK 안됨
+DELETE FROM EMP_RENAME; --ROLLBACK 가능
+
+--테이블을 삭제하는 DROP
+DROP TABLE EMP_RENAME;
+
+---
+CREATE TABLE TABLE_NOTNULL(
+    LOGIN_ID    VARCHAR(20) NOT NULL,
+    LOGIN_PWD   VARCHAR(20) NOT NULL,
+    TEL         VARCHAR(20)
+);
+
+
+INSERT INTO TABLE_NOTNULL (LOGIN_ID, LOGIN_PWD, TEL)
+    VALUES('k1992013', 'dkssudgktpdy','010-2392-2720' );
+    
+ SELECT * FROM TABLE_NOTNULL
+ 
+--UPDATE는 DML이며 열의 데이터를 수정
+UPDATE TABLE_NOTNULL
+	SET TEL = '010'
+	WHERE LOGIN_ID = '곰돌이사육사'
+	
+ALTER TABLE TABLE_NOTNULL
+	MODIFY TEL NOT NULL;
+
+--중복 값을 허용하지 않는 UNIQUE
+
+ALTER TABLE TABLE_NOTNULL
+	MODIFY TEL UNIQUE;
+	
+CREATE TABLE TABLE_UNIQUE(
+	LOGIN_ID VARCHAR2(20) PRIMARY KEY,
+	LOGIN_PWD VARCHAR2(20) NOT NULL,
+	TEL VARCHAR2(20)
+	);
+
+INSERT INTO TABLE_UNIQUE VALUES('안유진','ayj1234','010-1234-5678');
+INSERT INTO TABLE_UNIQUE VALUES('장원영','jwy567811','010-1234-123411');
+
+SELECT * FROM TABLE_UNIQUE
+
+DROP TABLE DEPT_FK
+
+--다른 테이블과 관계를 맺는 FOREIGN KEY(외래키)
+--외래키는 서로 다른 테이블과 관계를 정의하는데 사용하는 제약 조건
+
+CREATE TABLE DEPT_FK(
+	DEPTNO NUMBER(2) PRIMARY KEY,
+	DNAME VARCHAR2(14),
+	LOC VARCHAR2(13)
+);
+
+CREATE TABLE EMP_FK(
+	EMPNO NUMBER(4) PRIMARY KEY,
+	ENAME VARCHAR2(10),
+	JOB VARCHAR2(9),
+	MGR NUMBER(4),
+	HIREDATE DATE,
+	SAL NUMBER(7,2),
+	COMM NUMBER(7,2),
+	DEPTNO NUMBER(2) REFERENCES DEPT_FK(DEPTNO)
+	);
+INSERT INTO DEPT_FK VALUES(10, '걸그룹', 'SEOUL');
+INSERT INTO DEPT_FK VALUES(20, '걸그룹', 'SEOUL');
+INSERT INTO EMP_FK VALUES(9000,'안유진','아이브', 8000, SYSDATE, 5000,1000,10);
+INSERT INTO EMP_FK VALUES(9001,'유나','잇지', 7000, SYSDATE, 5000,1000,20);
+
+SELECT * FROM EMP_FK
+
+
+DELETE FROM EMP_FK WHERE DEPTNO = 20;
+DELETE FROM DEPT_FK WHERE DEPTNO = 20;
+
+-- 데이터 사전이란? 데이터베이스 메모리 성능,사용자,권한,객체 등 
+-- 오라클 데이터베이스에서 운영에 필요한 중요한 데이터가 보관 되어 있음
+
+SELECT * FROM dict;
+
+--인덱스란? 데이터 검색 성능 향상을 위해 테이블 열에 사용하는 객체
+SELECT * FROM USER_indexes
+CREATE INDEX idx_emp_sal ON emp(sal);
+
+--테이블 뷰 : 가상 테이블로 부르는 뷰는 하나 이상의 테이블을 조회하는 select 문을 저장하는 객체
+--사용목적: 필요한 테이블만 제공하거나 테이블의 특정 열을 숨기는 등의 보안 목적으로 사용
+
+CREATE VIEW VW_EMP20
+AS (SELECT empno, ename, job, Deptno
+	FROM EMP
+	WHERE deptno = 20);
+	
+SELECT * FROM VW_EMP20;
+
+--규칙에 따라 순번을 생성하는 시퀀스
+--시퀀스(Sequence)는 오라클 데이터베이스에서 특정 규칙에 맞는 연속 숫자를 생성하는 객체
+CREATE TABLE DEPT_SEQUENCE
+AS (SELECT * FROM DEPT WHERE 1 <>1);
+
+SELECT * FROM DEPT_SEQUENCE;
+
+--시퀀스 테이블
+
+CREATE SEQUENCE SEQ_DEPT_SEQUENCE
+INCREMENT BY 10
+START WITH 10
+MAXVALUE 90
+MINVALUE 0
+NOCYCLE
+CACHE 2;
+
+SELECT * FROM USER_SEQUENCES;
+
+INSERT INTO DEPT_SEQUENCE VALUES(SEQ_DEPT_SEQUENCE.NEXTVAL, 'REACT', 'BUSAN');
+SELECT * FROM DEPT_SEQUENCE;
